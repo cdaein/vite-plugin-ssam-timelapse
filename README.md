@@ -54,7 +54,27 @@ ssam(sketch, settings);
 ## Vanilla JS Example
 
 ```js
-// ...
+const canvas = document.createElement("canvas");
+canvas.width = canvas.height = 600;
+document.body.appendChild(canvas);
+const ctx = canvas.getContext("2d")!;
+
+// make changes to drawing code and save
+ctx.fillStyle = `gray`;
+ctx.fillRect(0, 0, 600, 600);
+ctx.beginPath();
+ctx.arc(300, 300, 300, 0, Math.PI * 2);
+ctx.fillStyle = `white`;
+ctx.fill();
+
+// at each save, canvas image will be exported
+if (import.meta.hot) {
+  import.meta.hot.on("ssam:timelapse-changed", () => {
+    import.meta.hot?.send("ssam:timelapse-newframe", {
+      image: canvas.toDataURL(),
+    });
+  });
+}
 ```
 
 ## Default Options

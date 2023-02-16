@@ -1,7 +1,7 @@
 {
   "name": "vite-plugin-ssam-timelapse",
   "version": "0.0.1",
-  "description": "",
+  "description": "Export a Canvas image at each file save. Use it with Ssam or any HTML Canvas",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -12,6 +12,7 @@
     "build": "tsc --noemit && tsup"
   },
   "keywords": [
+    "ssam",
     "vite-plugin"
   ],
   "author": "Daeinc",
@@ -25,5 +26,13 @@
   "dependencies": {
     "chokidar": "^3.5.3",
     "kleur": "^4.1.5"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cdaein/vite-plugin-ssam-timelapse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cdaein/vite-plugin-ssam-timelapse/issues"
+  },
+  "homepage": "https://github.com/cdaein/vite-plugin-ssam-timelapse#readme"
 }

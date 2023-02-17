@@ -19,6 +19,7 @@ import chokidar from "chokidar";
 import fs from "fs";
 import path from "path";
 import kleur from "kleur";
+import ansiRegex from "ansi-regex";
 
 const { gray, green, yellow } = kleur;
 
@@ -44,6 +45,10 @@ const prefix = () => {
   return `${gray(new Date().toLocaleTimeString())} ${green(
     `[ssam-timelapse]`
   )}`;
+};
+
+const removeAnsiEscapeCodes = (str: string) => {
+  return str.replace(ansiRegex(), "");
 };
 
 let maxImageNumber = -1;
@@ -125,12 +130,12 @@ export const ssamTimelapse = (opts?: Options) => ({
         .writeFile(path.join(outDir, filename), buffer)
         .then(() => {
           const msg = `${prefix()} ${filename} exported`;
-          client.send("ssam:log", { msg });
+          client.send("ssam:log", { msg: removeAnsiEscapeCodes(msg) });
           console.log(msg);
         })
         .catch((err) => {
           const msg = `${prefix()} ${err}`;
-          client.send("ssam:warn", { msg });
+          client.send("ssam:warn", { msg: removeAnsiEscapeCodes(msg) });
           console.error(`${prefix()} ${yellow(`${err}`)}`);
         });
 

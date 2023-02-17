@@ -6,13 +6,12 @@
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
- * - when saving the unchanged file, "change" emits nonetheless due to metadata change. => compare file hash?
+ * - when saving the unchanged file, "change" emits nonetheless due to metadata change.
  *   - modified time doesn't work b/c VSCode updates it.
+ *   - compare file hash?
  * - if sketch results in error (ie. syntax), don't export a blank image?
- * - how to handle if canvas dimension changes? => maybe use ffmpeg afterwards
+ *   - listen to window.onerror
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
- * - add console log for each image save?
- * - use Promise for writeFile
  */
 
 import { ViteDevServer } from "vite";
@@ -28,6 +27,7 @@ type Options = {
   watchDir?: string;
   outDir?: string;
   overwrite?: boolean;
+  stabilityThreshold?: number;
   padLength?: number;
   log?: boolean;
 };
@@ -36,6 +36,7 @@ const defaultOptions = {
   watchDir: "./src",
   outDir: "./timelapse",
   overwrite: false,
+  stabilityThreshold: 2000,
   padLength: 5,
   log: true,
 };
@@ -50,6 +51,7 @@ const removeAnsiEscapeCodes = (str: string) => {
   return str.replace(ansiRegex(), "");
 };
 
+// it gets incremented to 0 right before saving file
 let maxImageNumber = -1;
 
 export const ssamTimelapse = (opts?: Options) => ({
@@ -60,6 +62,8 @@ export const ssamTimelapse = (opts?: Options) => ({
     const overwrite = opts?.overwrite || defaultOptions.overwrite;
     const padLength = opts?.padLength || defaultOptions.padLength;
     const log = opts?.log || defaultOptions.log;
+    const stabilityThreshold =
+      opts?.stabilityThreshold || defaultOptions.stabilityThreshold;
 
     // if outDir not exist, create one
     if (!fs.existsSync(outDir)) {
@@ -103,7 +107,7 @@ export const ssamTimelapse = (opts?: Options) => ({
       .watch(watchDir, {
         ignoreInitial: true,
         awaitWriteFinish: {
-          stabilityThreshold: 1000,
+          stabilityThreshold,
           pollInterval: 100,
         },
       })

@@ -7,6 +7,7 @@
  *
  * TODO:
  * - when saving the unchanged file, "change" emits nonetheless due to metadata change. => compare file hash?
+ *   - modified time doesn't work b/c VSCode updates it.
  * - if sketch results in error (ie. syntax), don't export a blank image?
  * - how to handle if canvas dimension changes? => maybe use ffmpeg afterwards
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
@@ -28,7 +29,6 @@ type Options = {
   outDir?: string;
   overwrite?: boolean;
   padLength?: number;
-  incremental?: boolean;
   log?: boolean;
 };
 
@@ -37,7 +37,6 @@ const defaultOptions = {
   outDir: "./timelapse",
   overwrite: false,
   padLength: 5,
-  incremental: false, // TODO: implementation
   log: true,
 };
 
@@ -60,7 +59,6 @@ export const ssamTimelapse = (opts?: Options) => ({
     const outDir = opts?.outDir || defaultOptions.outDir;
     const overwrite = opts?.overwrite || defaultOptions.overwrite;
     const padLength = opts?.padLength || defaultOptions.padLength;
-    const incremental = opts?.incremental || defaultOptions.incremental;
     const log = opts?.log || defaultOptions.log;
 
     // if outDir not exist, create one
@@ -99,8 +97,6 @@ export const ssamTimelapse = (opts?: Options) => ({
           });
       }
     }
-
-    // TODO: if incremental, always create a new directory with outDir + datetime suffix
 
     // watch for file changes in watchDir
     chokidar

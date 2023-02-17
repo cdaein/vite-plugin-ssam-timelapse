@@ -1,18 +1,17 @@
 /**
  *
  * 1. when chokidar detects a file change,
- * 2. sends "ssam:timelapse-changed" to client
+ * 2. send "ssam:timelapse-changed" to client
  * 3. when client receives "ssam:timelapse-changed", it sends "ssam:timelapse-newframe" with canvas data url
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
  * - when saving the unchanged file, "change" emits nonetheless due to metadata change. => compare file hash?
- * - create a new outDir everytime (use datetime) => should be opts
- *   - option to continue or start with a new directory
+ * - if sketch results in error (ie. syntax), don't export a blank image?
  * - how to handle if canvas dimension changes? => maybe use ffmpeg afterwards
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
- * - handle animated sketch - use playhead=0?
  * - add console log for each image save?
+ * - use Promise for writeFile
  */
 
 import { ViteDevServer } from "vite";
@@ -29,6 +28,7 @@ type Options = {
   overwrite?: boolean;
   padLength?: number;
   incremental?: boolean;
+  log?: boolean;
 };
 
 const defaultOptions = {
@@ -37,6 +37,7 @@ const defaultOptions = {
   overwrite: false,
   padLength: 5,
   incremental: false, // TODO: implementation
+  log: true,
 };
 
 const prefix = () => {
@@ -55,24 +56,46 @@ export const ssamTimelapse = (opts?: Options) => ({
     const overwrite = opts?.overwrite || defaultOptions.overwrite;
     const padLength = opts?.padLength || defaultOptions.padLength;
     const incremental = opts?.incremental || defaultOptions.incremental;
+    const log = opts?.log || defaultOptions.log;
 
     // if outDir not exist, create one
     if (!fs.existsSync(outDir)) {
-      console.log(
-        `${prefix()} creating a new directory at ${path.resolve(outDir)}`
-      );
-      fs.mkdirSync(outDir);
+      fs.promises
+        .mkdir(outDir)
+        .then(() => {
+          if (log) {
+            const msg = `${prefix()} created a new directory at ${path.resolve(
+              outDir
+            )}`;
+            console.log(msg);
+          }
+        })
+        .catch((err) => {
+          console.error(`${prefix} ${yellow(`${err}`)}`);
+        });
     } else {
       if (!overwrite) {
         // if outDir already exists, check for image files and max numbering
-        const images = fs
-          .readdirSync(outDir)
-          .filter((filename) => filename.match(/\d+\.png/));
+        // const images = fs
+        //   .readdirSync(outDir)
+        //   .filter((filename) => filename.match(/\d+\.png/));
 
-        if (images.length !== 0) {
-          const imageNumbers = images.map((filename) => parseInt(filename, 10));
-          maxImageNumber = Math.max(...imageNumbers);
-        }
+        fs.promises
+          .readdir(outDir)
+          .then((files) => {
+            const images = files.filter((filename) =>
+              filename.match(/\d+\.png/)
+            );
+            if (images.length !== 0) {
+              const imageNumbers = images.map((filename) =>
+                parseInt(filename, 10)
+              );
+              maxImageNumber = Math.max(...imageNumbers);
+            }
+          })
+          .catch((err) => {
+            console.error(`${prefix} ${yellow(`${err}`)}`);
+          });
       }
     }
 
@@ -93,20 +116,36 @@ export const ssamTimelapse = (opts?: Options) => ({
       });
 
     // when canvas data received, export an image
-    server.ws.on("ssam:timelapse-newframe", (data) => {
+    server.ws.on("ssam:timelapse-newframe", (data, client) => {
       const buffer = Buffer.from(
         data.image.replace(/^data:image\/png;base64,/, ""),
         "base64"
       );
 
       const imageNumber = maxImageNumber + 1;
-      fs.writeFileSync(
-        path.join(
-          outDir,
-          `${imageNumber.toString().padStart(padLength, "0")}.png`
-        ),
-        buffer
-      );
+      // fs.writeFileSync(
+      //   path.join(
+      //     outDir,
+      //     `${imageNumber.toString().padStart(padLength, "0")}.png`
+      //   ),
+      //   buffer
+      // );
+
+      const filename = `${imageNumber.toString().padStart(padLength, "0")}.png`;
+
+      fs.promises
+        .writeFile(path.join(outDir, filename), buffer)
+        .then(() => {
+          const msg = `${prefix} `;
+          client.send("ssam:log", { msg });
+          console.log(`${prefix} ${filename} exported`);
+        })
+        .catch((err) => {
+          const msg = `${prefix} ${err}`;
+          client.send("ssam:warn", { msg });
+          console.error(`${prefix} ${yellow(`${err}`)}`);
+        });
+
       maxImageNumber = imageNumber;
     });
   },

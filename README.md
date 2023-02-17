@@ -14,7 +14,7 @@ When the plugin detects a change in the sketch source code, it will export a PNG
 
 > ✋ If you use Git, you may want to include `timelapse` directory in `.gitignore`.
 
-## How to use
+## How to set up
 
 In Vite config:
 
@@ -26,6 +26,8 @@ export default defineConfig({
   // ...
 });
 ```
+
+## With Ssam
 
 In your Ssam sketch source code:
 
@@ -53,7 +55,7 @@ const settings = {
 ssam(sketch, settings);
 ```
 
-## Vanilla JS Example
+## With Vanilla JS
 
 ```js
 const canvas = document.createElement("canvas");
@@ -83,13 +85,21 @@ if (import.meta.hot) {
 
 ```js
 ssamTimelapse({
-  watchDir: "./src", // detect changes in the src directory
-  outDir: "./timelapse", // will create the directory if it does not exist
-  overwrite: false, // overwrite existing files
-  ignored: /(^|[\/\\])\../ // ignore dotfiles. you can use string, string[] or regex
-  stabilityThreshold: 1500, // how quickly plugin responds to file change (in milliseconds). see Chokidar documentation
-  padLength: 5, // how many zeros to pad to filename
-  log: true, // console logging in browser
+  // detect changes in the src directory
+  watchDir: "./src",
+  // will create the directory if it does not exist
+  outDir: "./timelapse",
+  // overwrite existing files
+  overwrite: false,
+  // ignore dotfiles. empty files are ignored by default.
+  // you can use regex, string or string[]
+  ignored: /(^|[\/\\])\../
+  // how quickly plugin responds to file change (in milliseconds). see Chokidar documentation
+  stabilityThreshold: 1500,
+  // how many zeros to pad to filename
+  padLength: 5,
+  // console logging in browser
+  log: true,
 });
 ```
 

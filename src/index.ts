@@ -71,7 +71,7 @@ export const ssamTimelapse = (opts?: Options) => ({
           }
         })
         .catch((err) => {
-          console.error(`${prefix} ${yellow(`${err}`)}`);
+          console.error(`${prefix()} ${yellow(`${err}`)}`);
         });
     } else {
       if (!overwrite) {
@@ -94,7 +94,7 @@ export const ssamTimelapse = (opts?: Options) => ({
             }
           })
           .catch((err) => {
-            console.error(`${prefix} ${yellow(`${err}`)}`);
+            console.error(`${prefix()} ${yellow(`${err}`)}`);
           });
       }
     }
@@ -136,14 +136,14 @@ export const ssamTimelapse = (opts?: Options) => ({
       fs.promises
         .writeFile(path.join(outDir, filename), buffer)
         .then(() => {
-          const msg = `${prefix} `;
+          const msg = `${prefix()} `;
           client.send("ssam:log", { msg });
-          console.log(`${prefix} ${filename} exported`);
+          console.log(`${prefix()} ${filename} exported`);
         })
         .catch((err) => {
-          const msg = `${prefix} ${err}`;
+          const msg = `${prefix()} ${err}`;
           client.send("ssam:warn", { msg });
-          console.error(`${prefix} ${yellow(`${err}`)}`);
+          console.error(`${prefix()} ${yellow(`${err}`)}`);
         });
 
       maxImageNumber = imageNumber;

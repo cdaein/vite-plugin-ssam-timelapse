@@ -136,9 +136,9 @@ export const ssamTimelapse = (opts?: Options) => ({
       fs.promises
         .writeFile(path.join(outDir, filename), buffer)
         .then(() => {
-          const msg = `${prefix()} `;
+          const msg = `${prefix()} ${filename} exported`;
           client.send("ssam:log", { msg });
-          console.log(`${prefix()} ${filename} exported`);
+          console.log(msg);
         })
         .catch((err) => {
           const msg = `${prefix()} ${err}`;

@@ -130,12 +130,12 @@ export const ssamTimelapse = (opts?: Options) => ({
         .writeFile(path.join(outDir, filename), buffer)
         .then(() => {
           const msg = `${prefix()} ${filename} exported`;
-          client.send("ssam:log", { msg: removeAnsiEscapeCodes(msg) });
+          log && client.send("ssam:log", { msg: removeAnsiEscapeCodes(msg) });
           console.log(msg);
         })
         .catch((err) => {
           const msg = `${prefix()} ${err}`;
-          client.send("ssam:warn", { msg: removeAnsiEscapeCodes(msg) });
+          log && client.send("ssam:warn", { msg: removeAnsiEscapeCodes(msg) });
           console.error(`${prefix()} ${yellow(`${err}`)}`);
         });
 

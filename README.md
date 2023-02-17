@@ -87,7 +87,7 @@ ssamTimelapse({
   outDir: "./timelapse", // will create the directory if it does not exist
   overwrite: false, // overwrite existing files
   padLength: 5, // how many zeros to pad to filename
-  log: true, // console logging
+  log: true, // console logging in browser
 });
 ```
 

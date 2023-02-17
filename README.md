@@ -1,6 +1,6 @@
 # vite-plugin-ssam-timelapse
 
-This plugin is created to be used with [Ssam](https://github.com/cdaein/ssam) to capture in-progress images of a Canvas sketch. It may also be used in other cases.
+This plugin is created to be used with [Ssam](https://github.com/cdaein/ssam) to create a visual documentation of your sketch over time. It may also be used with other libraries if you can get a Canvas object reference.
 
 ## Install
 
@@ -10,7 +10,9 @@ npm i -D vite-plugin-ssam-timelapse
 
 ## How it works
 
-When the plugin detects a change in the sketch source code, it will export a PNG image with sequential numbering. You can later convert the resulting image sequence into a video to document your visual progress.
+When the plugin detects a change in the sketch source code, it will export a PNG image with sequential numbering into `timelapse` directory. If the directory doesn't exist, it will make one for you. You can later convert the resulting image sequence into a video to create a visual documentation of your sketch. When you close the Vite server and later come back to the same sketch, it will continue incrementing image filenames from where you left off.
+
+> ✋ If you use Git, you may want to include `timelapse` directory in `.gitignore`.
 
 ## How to use
 
@@ -96,7 +98,7 @@ Use a video editing program to convert the image sequence into a video file. If 
 ffmpeg -framerate 5 -pattern_type glob -i '*.png' -c:v libx264 -preset slow -crf 20 -pix_fmt yuv420p -y output.mp4
 ```
 
-Note that `ffmpeg` expects the filenames are sequential. If you delete files from the image sequence, you will need to rename them before running the ffmpeg command.
+Note that `ffmpeg` expects the filenames to be sequential. From my testing on Mac, `'*.png'` will continue to work even if some images are missing, but if you get an error, you will need to rename them before running the ffmpeg command.
 
 ## License
 

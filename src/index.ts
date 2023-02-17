@@ -6,10 +6,6 @@
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
- * - when a new file is added for the first time,
- *   - export a file or not?
- *   - if it's first time and empty no need to export.
- * - add opts.ignored array to exclude certain files within watchDir
  * - if sketch results in error (ie. syntax), don't export a blank image?
  *   - listen to window.onerror
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
@@ -29,6 +25,7 @@ type Options = {
   watchDir?: string;
   outDir?: string;
   overwrite?: boolean;
+  ignored?: string | string[] | RegExp;
   stabilityThreshold?: number;
   padLength?: number;
   log?: boolean;
@@ -38,6 +35,7 @@ const defaultOptions = {
   watchDir: "./src",
   outDir: "./timelapse",
   overwrite: false,
+  ignored: /(^|[\/\\])\../, // ignore dotfiles
   stabilityThreshold: 1500,
   padLength: 5,
   log: true,
@@ -64,6 +62,7 @@ export const ssamTimelapse = (opts?: Options) => ({
     const watchDir = opts?.watchDir || defaultOptions.watchDir;
     const outDir = opts?.outDir || defaultOptions.outDir;
     const overwrite = opts?.overwrite || defaultOptions.overwrite;
+    const ignored = opts?.ignored || defaultOptions.ignored;
     const padLength = opts?.padLength || defaultOptions.padLength;
     const log = opts?.log || defaultOptions.log;
     const stabilityThreshold =
@@ -109,7 +108,7 @@ export const ssamTimelapse = (opts?: Options) => ({
     // watch for file changes in watchDir
     chokidar
       .watch(watchDir, {
-        ignored: /(^|[\/\\])\../, // ignore dotfiles
+        ignored,
         ignoreInitial: true, // first loading
         awaitWriteFinish: {
           stabilityThreshold,

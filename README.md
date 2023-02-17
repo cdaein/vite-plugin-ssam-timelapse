@@ -86,6 +86,7 @@ ssamTimelapse({
   watchDir: "./src", // detect changes in the src directory
   outDir: "./timelapse", // will create the directory if it does not exist
   overwrite: false, // overwrite existing files
+  ignored: /(^|[\/\\])\../ // ignore dotfiles. you can use string, string[] or regex
   stabilityThreshold: 1500, // how quickly plugin responds to file change (in milliseconds). see Chokidar documentation
   padLength: 5, // how many zeros to pad to filename
   log: true, // console logging in browser

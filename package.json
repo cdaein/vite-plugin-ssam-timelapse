@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-ssam-timelapse",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Export a Canvas image at each file save. Use it with Ssam or any HTML Canvas",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

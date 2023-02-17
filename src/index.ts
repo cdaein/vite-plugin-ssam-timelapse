@@ -6,9 +6,6 @@
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
- * - when saving the unchanged file, "change" emits nonetheless due to metadata change.
- *   - modified time doesn't work b/c VSCode updates it.
- *   - compare file hash?
  * - if sketch results in error (ie. syntax), don't export a blank image?
  *   - listen to window.onerror
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
@@ -20,6 +17,7 @@ import fs from "fs";
 import path from "path";
 import kleur from "kleur";
 import ansiRegex from "ansi-regex";
+import crypto from "crypto";
 
 const { gray, green, yellow } = kleur;
 
@@ -36,7 +34,7 @@ const defaultOptions = {
   watchDir: "./src",
   outDir: "./timelapse",
   overwrite: false,
-  stabilityThreshold: 2000,
+  stabilityThreshold: 1500,
   padLength: 5,
   log: true,
 };
@@ -53,6 +51,8 @@ const removeAnsiEscapeCodes = (str: string) => {
 
 // it gets incremented to 0 right before saving file
 let maxImageNumber = -1;
+// store all file hashes in watchDir
+let fileHashes: Record<string, any> = {};
 
 export const ssamTimelapse = (opts?: Options) => ({
   name: "ssam-timelapse",
@@ -105,15 +105,31 @@ export const ssamTimelapse = (opts?: Options) => ({
     // watch for file changes in watchDir
     chokidar
       .watch(watchDir, {
-        ignoreInitial: true,
+        ignored: /(^|[\/\\])\../, // ignore dotfiles
+        ignoreInitial: true, // first loading
         awaitWriteFinish: {
           stabilityThreshold,
           pollInterval: 100,
         },
       })
-      .on("change", (path, stats) => {
-        // if file change is detected, request canvas data to client
-        server.ws.send("ssam:timelapse-changed");
+      .on("all", (event, filePath, stats) => {
+        // compare file hash to make sure file content really changed
+        if (event === "add" || event === "change") {
+          const absFilePath = path.resolve(filePath);
+          const hash = crypto.createHash("sha256");
+          const stream = fs.createReadStream(absFilePath);
+          stream.on("data", (chunk) => {
+            hash.update(chunk);
+          });
+          stream.on("end", () => {
+            const newHashValue = hash.digest("hex");
+            if (newHashValue !== fileHashes[absFilePath]) {
+              fileHashes[absFilePath] = newHashValue;
+              // if file change is detected, request canvas data to client
+              server.ws.send("ssam:timelapse-changed");
+            }
+          });
+        }
       });
 
     // when canvas data received, export an image

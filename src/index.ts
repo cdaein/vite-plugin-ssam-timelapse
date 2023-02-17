@@ -6,6 +6,10 @@
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
+ * - when a new file is added for the first time,
+ *   - export a file or not?
+ *   - if it's first time and empty no need to export.
+ * - add opts.ignored array to exclude certain files within watchDir
  * - if sketch results in error (ie. syntax), don't export a blank image?
  *   - listen to window.onerror
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
@@ -115,9 +119,13 @@ export const ssamTimelapse = (opts?: Options) => ({
       .on("all", (event, filePath, stats) => {
         // compare file hash to make sure file content really changed
         if (event === "add" || event === "change") {
+          // exclude empty file
+          if (stats && stats.size === 0) return;
+
           const absFilePath = path.resolve(filePath);
           const hash = crypto.createHash("sha256");
           const stream = fs.createReadStream(absFilePath);
+
           stream.on("data", (chunk) => {
             hash.update(chunk);
           });

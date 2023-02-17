@@ -76,10 +76,6 @@ export const ssamTimelapse = (opts?: Options) => ({
     } else {
       if (!overwrite) {
         // if outDir already exists, check for image files and max numbering
-        // const images = fs
-        //   .readdirSync(outDir)
-        //   .filter((filename) => filename.match(/\d+\.png/));
-
         fs.promises
           .readdir(outDir)
           .then((files) => {
@@ -110,7 +106,7 @@ export const ssamTimelapse = (opts?: Options) => ({
           pollInterval: 100,
         },
       })
-      .on("change", (path) => {
+      .on("change", (path, stats) => {
         // if file change is detected, request canvas data to client
         server.ws.send("ssam:timelapse-changed");
       });
@@ -123,14 +119,6 @@ export const ssamTimelapse = (opts?: Options) => ({
       );
 
       const imageNumber = maxImageNumber + 1;
-      // fs.writeFileSync(
-      //   path.join(
-      //     outDir,
-      //     `${imageNumber.toString().padStart(padLength, "0")}.png`
-      //   ),
-      //   buffer
-      // );
-
       const filename = `${imageNumber.toString().padStart(padLength, "0")}.png`;
 
       fs.promises

@@ -6,6 +6,9 @@
  * 4. when plugin receives "ssam:timelapse-newframe", it will export an image
  *
  * TODO:
+ * - opts.mode: "save" | "interval"
+ *   - at each save
+ *   - at fixed interval
  * - if sketch results in error (ie. syntax), don't export a blank image?
  *   - listen to window.onerror
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
@@ -19,15 +22,20 @@ import kleur from "kleur";
 import ansiRegex from "ansi-regex";
 import crypto from "crypto";
 
-const { gray, green, yellow } = kleur;
-
 type Options = {
+  /** directory to watch for */
   watchDir?: string;
+  /** directory to save images to */
   outDir?: string;
+  /** overwrite existing images */
   overwrite?: boolean;
+  /** files, directories to ignore */
   ignored?: string | string[] | RegExp;
+  /** how quickly to respond to change (in milliseconds) */
   stabilityThreshold?: number;
+  /** how many preceding zeros to pad to filenames */
   padLength?: number;
+  /** console logging in browser */
   log?: boolean;
 };
 
@@ -40,6 +48,8 @@ const defaultOptions = {
   padLength: 5,
   log: true,
 };
+
+const { gray, green, yellow } = kleur;
 
 const prefix = () => {
   return `${gray(new Date().toLocaleTimeString())} ${green(
@@ -56,29 +66,38 @@ let maxImageNumber = -1;
 // store all file hashes in watchDir
 let fileHashes: Record<string, any> = {};
 
-export const ssamTimelapse = (opts?: Options) => ({
-  name: "ssam-timelapse",
+export const ssamTimelapse = (opts: Options = {}) => ({
+  name: "vite-plugin-ssam-timelapse",
   configureServer(server: ViteDevServer) {
-    const watchDir = opts?.watchDir || defaultOptions.watchDir;
-    const outDir = opts?.outDir || defaultOptions.outDir;
-    const overwrite = opts?.overwrite || defaultOptions.overwrite;
-    const ignored = opts?.ignored || defaultOptions.ignored;
-    const padLength = opts?.padLength || defaultOptions.padLength;
-    const log = opts?.log || defaultOptions.log;
-    const stabilityThreshold =
-      opts?.stabilityThreshold || defaultOptions.stabilityThreshold;
+    // const watchDir = opts.watchDir || defaultOptions.watchDir;
+    // const outDir = opts.outDir || defaultOptions.outDir;
+    // const overwrite = opts.overwrite || defaultOptions.overwrite;
+    // const ignored = opts.ignored || defaultOptions.ignored;
+    // const padLength = opts.padLength || defaultOptions.padLength;
+    // const log = opts.log || defaultOptions.log;
+    // const stabilityThreshold =
+    //   opts.stabilityThreshold || defaultOptions.stabilityThreshold;
+
+    // update defaultOptions with user-provided options
+    const {
+      watchDir,
+      outDir,
+      overwrite,
+      ignored,
+      padLength,
+      log,
+      stabilityThreshold,
+    } = Object.assign(defaultOptions, opts);
 
     // if outDir not exist, create one
     if (!fs.existsSync(outDir)) {
       fs.promises
         .mkdir(outDir)
         .then(() => {
-          if (log) {
-            const msg = `${prefix()} created a new directory at ${path.resolve(
-              outDir
-            )}`;
-            console.log(msg);
-          }
+          const msg = `${prefix()} created a new directory at ${path.resolve(
+            outDir
+          )}`;
+          console.log(msg);
         })
         .catch((err) => {
           console.error(`${prefix()} ${yellow(`${err}`)}`);

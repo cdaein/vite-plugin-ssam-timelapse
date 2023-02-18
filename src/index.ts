@@ -15,6 +15,7 @@
  */
 
 import { ViteDevServer } from "vite";
+import type { PluginOption } from "vite";
 import chokidar from "chokidar";
 import fs from "fs";
 import path from "path";
@@ -66,18 +67,10 @@ let maxImageNumber = -1;
 // store all file hashes in watchDir
 let fileHashes: Record<string, any> = {};
 
-export const ssamTimelapse = (opts: Options = {}) => ({
+export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
   name: "vite-plugin-ssam-timelapse",
+  apply: "serve", // plugin only works for development
   configureServer(server: ViteDevServer) {
-    // const watchDir = opts.watchDir || defaultOptions.watchDir;
-    // const outDir = opts.outDir || defaultOptions.outDir;
-    // const overwrite = opts.overwrite || defaultOptions.overwrite;
-    // const ignored = opts.ignored || defaultOptions.ignored;
-    // const padLength = opts.padLength || defaultOptions.padLength;
-    // const log = opts.log || defaultOptions.log;
-    // const stabilityThreshold =
-    //   opts.stabilityThreshold || defaultOptions.stabilityThreshold;
-
     // update defaultOptions with user-provided options
     const {
       watchDir,

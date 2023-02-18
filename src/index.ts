@@ -124,6 +124,27 @@ export const ssamTimelapse = (opts: Options = {}) => ({
       }
     }
 
+    const handleAddOrChange = (filePath: string, stats: fs.Stats) => {
+      // exclude empty file
+      if (stats && stats.size === 0) return;
+
+      // compare file hash to make sure file content really changed
+      const absFilePath = path.resolve(filePath);
+      const hash = crypto.createHash("sha256");
+      const stream = fs.createReadStream(absFilePath);
+      stream.on("data", (chunk) => {
+        hash.update(chunk);
+      });
+      stream.on("end", () => {
+        const newHashValue = hash.digest("hex");
+        if (newHashValue !== fileHashes[absFilePath]) {
+          fileHashes[absFilePath] = newHashValue;
+          // if file change is detected, request canvas data to client
+          server.ws.send("ssam:timelapse-changed");
+        }
+      });
+    };
+
     // watch for file changes in watchDir
     chokidar
       .watch(watchDir, {
@@ -134,29 +155,8 @@ export const ssamTimelapse = (opts: Options = {}) => ({
           pollInterval: 100,
         },
       })
-      .on("all", (event, filePath, stats) => {
-        // compare file hash to make sure file content really changed
-        if (event === "add" || event === "change") {
-          // exclude empty file
-          if (stats && stats.size === 0) return;
-
-          const absFilePath = path.resolve(filePath);
-          const hash = crypto.createHash("sha256");
-          const stream = fs.createReadStream(absFilePath);
-
-          stream.on("data", (chunk) => {
-            hash.update(chunk);
-          });
-          stream.on("end", () => {
-            const newHashValue = hash.digest("hex");
-            if (newHashValue !== fileHashes[absFilePath]) {
-              fileHashes[absFilePath] = newHashValue;
-              // if file change is detected, request canvas data to client
-              server.ws.send("ssam:timelapse-changed");
-            }
-          });
-        }
-      });
+      .on("add", handleAddOrChange)
+      .on("change", handleAddOrChange);
 
     // when canvas data received, export an image
     server.ws.on("ssam:timelapse-newframe", (data, client) => {

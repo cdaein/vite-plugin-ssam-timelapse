@@ -57,6 +57,8 @@ ssam(sketch, settings);
 
 ## With Vanilla JS
 
+You can use the plugin with Vanilla JS or other Canvas libraries as long as you can get a reference to the Canvas object.
+
 ```js
 const canvas = document.createElement("canvas");
 canvas.width = canvas.height = 600;

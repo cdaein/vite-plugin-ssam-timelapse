@@ -14,8 +14,7 @@
  * - use handleHotUpdate() to detect source code change instead of adding listener to the source itself?
  */
 
-import { ViteDevServer } from "vite";
-import type { PluginOption } from "vite";
+import type { PluginOption, ViteDevServer } from "vite";
 import chokidar from "chokidar";
 import fs from "fs";
 import path from "path";

@@ -16,11 +16,11 @@
 
 import type { PluginOption, ViteDevServer } from "vite";
 import chokidar from "chokidar";
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 import kleur from "kleur";
 import ansiRegex from "ansi-regex";
-import crypto from "crypto";
+import { createHash } from "node:crypto";
 
 type Options = {
   /** directory to watch for */
@@ -122,7 +122,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
 
       // compare file hash to make sure file content really changed
       const absFilePath = path.resolve(filePath);
-      const hash = crypto.createHash("sha256");
+      const hash = createHash("sha256");
       const stream = fs.createReadStream(absFilePath);
       stream.on("data", (chunk) => {
         hash.update(chunk);

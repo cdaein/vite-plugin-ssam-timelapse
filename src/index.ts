@@ -159,11 +159,12 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
 
       const imageNumber = maxImageNumber + 1;
       const filename = `${imageNumber.toString().padStart(padLength, "0")}.png`;
+      const filePath = path.join(outDir, filename);
 
       fs.promises
-        .writeFile(path.join(outDir, filename), buffer)
+        .writeFile(filePath, buffer)
         .then(() => {
-          const msg = `${prefix()} ${filename} exported`;
+          const msg = `${prefix()} ${filePath} exported`;
           log && client.send("ssam:log", { msg: removeAnsiEscapeCodes(msg) });
           console.log(msg);
         })

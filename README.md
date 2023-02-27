@@ -97,13 +97,17 @@ ssamTimelapse({
   // you can use regex, string or string[]
   ignored: /(^|[\/\\])\../
   // how quickly plugin responds to file change (in milliseconds). see Chokidar documentation
-  stabilityThreshold: 1500,
+  stabilityThreshold: 10_000,
   // how many zeros to pad to filename
   padLength: 5,
   // console logging in browser
   log: true,
 });
 ```
+
+When `overwrite` is set to `true`, every time the Vite server restarts, it will overwrite existing files on the `outDir`.
+
+To avoid too frequent image exports, the default `stabilityThreshold` is set to 10 seconds, meaning the plugin will wait 10 seconds for all file changes to be settled.
 
 ## Convert to MP4
 

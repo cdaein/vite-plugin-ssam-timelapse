@@ -44,7 +44,7 @@ const defaultOptions = {
   outDir: "./timelapse",
   overwrite: false,
   ignored: /(^|[\/\\])\../, // ignore dotfiles
-  stabilityThreshold: 1500,
+  stabilityThreshold: 10_000,
   padLength: 5,
   log: true,
 };

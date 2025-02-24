@@ -18,9 +18,9 @@ import type { PluginOption, ViteDevServer } from "vite";
 import chokidar from "chokidar";
 import fs from "node:fs";
 import path from "node:path";
-import kleur from "kleur";
 import ansiRegex from "ansi-regex";
 import { createHash } from "node:crypto";
+import { color } from "./utils";
 
 type Options = {
   /** directory to watch for */
@@ -49,11 +49,10 @@ const defaultOptions = {
   log: true,
 };
 
-const { gray, green, yellow } = kleur;
-
 const prefix = () => {
-  return `${gray(new Date().toLocaleTimeString())} ${green(
+  return `${color(new Date().toLocaleTimeString(), "gray")} ${color(
     `[ssam-timelapse]`,
+    "green",
   )}`;
 };
 
@@ -92,7 +91,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
           console.log(msg);
         })
         .catch((err) => {
-          console.error(`${prefix()} ${yellow(`${err}`)}`);
+          console.error(`${prefix()} ${color(`${err}`, "yellow")}`);
         });
     } else {
       if (!overwrite) {
@@ -111,7 +110,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
             }
           })
           .catch((err) => {
-            console.error(`${prefix()} ${yellow(`${err}`)}`);
+            console.error(`${prefix()} ${color(`${err}`, "yellow")}`);
           });
       }
     }
@@ -171,7 +170,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
         .catch((err) => {
           const msg = `${prefix()} ${err}`;
           log && client.send("ssam:warn", { msg: removeAnsiEscapeCodes(msg) });
-          console.error(`${prefix()} ${yellow(`${err}`)}`);
+          console.error(`${prefix()} ${color(`${err}`, "yellow")}`);
         });
 
       maxImageNumber = imageNumber;

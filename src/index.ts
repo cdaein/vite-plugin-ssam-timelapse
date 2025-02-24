@@ -53,7 +53,7 @@ const { gray, green, yellow } = kleur;
 
 const prefix = () => {
   return `${gray(new Date().toLocaleTimeString())} ${green(
-    `[ssam-timelapse]`
+    `[ssam-timelapse]`,
   )}`;
 };
 
@@ -87,7 +87,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
         .mkdir(outDir)
         .then(() => {
           const msg = `${prefix()} created a new directory at ${path.resolve(
-            outDir
+            outDir,
           )}`;
           console.log(msg);
         })
@@ -101,11 +101,11 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
           .readdir(outDir)
           .then((files) => {
             const images = files.filter((filename) =>
-              filename.match(/\d+\.png/)
+              filename.match(/\d+\.png/),
             );
             if (images.length !== 0) {
               const imageNumbers = images.map((filename) =>
-                parseInt(filename, 10)
+                parseInt(filename, 10),
               );
               maxImageNumber = Math.max(...imageNumbers);
             }
@@ -116,7 +116,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
       }
     }
 
-    const handleAddOrChange = (filePath: string, stats: fs.Stats) => {
+    const handleAddOrChange = (filePath: string, stats?: fs.Stats) => {
       // exclude empty file
       if (stats && stats.size === 0) return;
 
@@ -154,7 +154,7 @@ export const ssamTimelapse = (opts: Options = {}): PluginOption => ({
     server.ws.on("ssam:timelapse-newframe", (data, client) => {
       const buffer = Buffer.from(
         data.image.replace(/^data:image\/png;base64,/, ""),
-        "base64"
+        "base64",
       );
 
       const imageNumber = maxImageNumber + 1;

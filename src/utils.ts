@@ -11,4 +11,4 @@ const colors = {
  * @returns Original string surrounded by color code and reset code.
  */
 export const color = (str: string, c: keyof typeof colors) =>
-  `${colors[c]}str${colors.reset}`;
+  `${colors[c]}${str}${colors.reset}`;

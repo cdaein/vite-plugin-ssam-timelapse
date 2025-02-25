@@ -119,6 +119,10 @@ ffmpeg -framerate 5 -pattern_type glob -i '*.png' -c:v libx264 -preset slow -crf
 
 Note that `ffmpeg` expects the filenames to be sequential. From my testing on Mac, `'*.png'` will continue to work even if some images are missing, but if you get an error, you will need to rename them before running the ffmpeg command.
 
+## To Dos
+
+- [ ] It generates duplicate images often when editing code not related to visual. The plugin may first compare the image before saving a new one.
+
 ## License
 
 MIT

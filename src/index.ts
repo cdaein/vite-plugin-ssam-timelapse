@@ -18,7 +18,6 @@ import type { PluginOption, ViteDevServer } from "vite";
 import chokidar from "chokidar";
 import fs from "node:fs";
 import path from "node:path";
-import ansiRegex from "ansi-regex";
 import { createHash } from "node:crypto";
 import { color } from "./utils";
 
@@ -56,8 +55,11 @@ const prefix = () => {
   )}`;
 };
 
+const ANSI_PATTERN =
+  /[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+
 const removeAnsiEscapeCodes = (str: string) => {
-  return str.replace(ansiRegex(), "");
+  return str.replace(ANSI_PATTERN, "");
 };
 
 // it gets incremented to 0 right before saving file
